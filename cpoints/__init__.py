@@ -71,6 +71,14 @@ class Statistics(object):
         self.data["kinetic_energy"] = namd_get_energy_col(
             fin, 11, skip_percent=skip_percent)
 
+    def from_mc(self, fin, usecols=None):
+        """ Read statistical data from monte carlo output file.
+        """
+        if usecols is None:
+            usecols = [1, 3]
+        self.data["N"] = np.loadtxt(fin, usecols=np.array([usecols[0]]))
+        self.data["E"] = np.loadtxt(fin, usecols=np.array([usecols[1]]))
+
     def to_csv(self, fout):
         """ Save statistical data to CSV file.
         """
