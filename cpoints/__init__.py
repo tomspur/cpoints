@@ -37,9 +37,11 @@ def namd_get_energy_col(fin, column, skip_percent=0.1):
 class Statistics(object):
     """ Class to investigate statistics of MC/MD simulation.
     """
-    timestep = -1
-    freq = -1
-    data = pd.DataFrame()
+    def __init__(self, ensemble="NPT"):
+        self.timestep = -1
+        self.freq = -1
+        self.data = pd.DataFrame()
+        self.ensemble = ensemble
 
     def from_namd(self, fin, skip_percent=0.1):
         """ Read statistical data from NAMD output file.
@@ -49,6 +51,8 @@ class Statistics(object):
         - skip_percent: Percentage of the trajectory that is skipped at the
           beginning.
         """
+        assert self.ensemble == "NPT", "Reading from NAMD, " \
+                                       "the ensemble must be NPT"
         self.timestep = namd_search_col(fin, "Info: TIMESTEP", 3)
         self.freq = namd_search_col(fin, "PRESSURE OUTPUT STEPS", 5)
         self.data["volume"] = namd_get_energy_col(fin, 19,
@@ -74,6 +78,8 @@ class Statistics(object):
     def from_mc(self, fin, usecols=None):
         """ Read statistical data from monte carlo output file.
         """
+        assert self.ensemble == "grand_canonical", "Reading from monte carlo "\
+                                "output, the ensemble must be grand_canonical!"
         if usecols is None:
             usecols = [1, 3]
         self.data["N"] = np.loadtxt(fin, usecols=np.array([usecols[0]]))

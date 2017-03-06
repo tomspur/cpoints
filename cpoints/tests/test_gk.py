@@ -3,6 +3,7 @@
 Test grand canonical simulation data
 """
 import os
+import pytest
 
 import cpoints as cp
 
@@ -17,5 +18,9 @@ def get_test_file():
 def test_read_gk():
     """ test reading of gk file.
     """
-    data = cp.Statistics()
+    data = cp.Statistics(ensemble="grand_canonical")
     data.from_mc(get_test_file())
+
+    with pytest.raises(AssertionError):
+        data = cp.Statistics(ensemble="NPT")
+        data.from_mc(get_test_file())
