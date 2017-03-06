@@ -38,7 +38,7 @@ class Statistics(object):
     """ Class to investigate statistics of MC/MD simulation.
     """
     timestep = -1
-    freqs = -1
+    freq = -1
     data = pd.DataFrame()
 
     def from_namd(self, fin, skip_percent=0.1):
