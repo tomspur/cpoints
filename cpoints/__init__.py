@@ -3,8 +3,9 @@
 Tools to calculate critical points from monte carlo or molecular dynamics
 simulations.
 """
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pickle
 import subprocess
 
 
@@ -134,6 +135,8 @@ K4: %f
         self.data["kinetic_energy"] = namd_get_energy_col(
             fin, 11, skip_percent=skip_percent)
 
+        self.to_pkl(fin[:fin.rfind(".")] + ".pkl")
+
     def from_mc(self, fin, usecols=None):
         """ Read statistical data from monte carlo output file.
         """
@@ -153,3 +156,9 @@ K4: %f
         """ Save statistical data to CSV file.
         """
         self.data.to_csv(fout, index=False)
+
+    def to_pkl(self, fout):
+        """ Save all data and states to pickle file.
+        """
+        with open(fout, "wb") as fout:
+            pickle.dump(self, fout)
