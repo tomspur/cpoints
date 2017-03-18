@@ -50,8 +50,12 @@ class Statistics(object):
 timestep: %f
 data.shape: %s
 data.columns: %s
+
+Current values at this point in the phase space:
+K2: %f
+K4: %f
 """ % (self.ensemble, self.timestep, self.data.shape,
-       self.data.columns.values)
+       self.data.columns.values, self.K2, self.K4)
 
     @property
     def critical_observable(self):
@@ -59,9 +63,39 @@ data.columns: %s
         """
         if self.ensemble == "NPT":
             return self.data["density"] - \
-                self.fm_s * self.data["energy"] / self.data["volume"]
+                self.fm_s * self.data["total_energy"] / self.data["volume"]
         else:
             return self.data["N"]
+
+    @property
+    def reweighting(self):
+        return np.ones_like(self.data["total_energy"])
+
+    @property
+    def K2(self):
+        """ Returns second cumulant.
+        """
+        w = self.reweighting
+        avg = np.average(self.critical_observable, weights=w)
+        H_m = np.abs(self.critical_observable - avg)
+        M1 = np.average(H_m, weights=w)
+        H_m2 = H_m**2
+        M2 = np.average(H_m2, weights=w)
+        K2 = M2/(M1*M1)
+        return K2
+
+    @property
+    def K4(self):
+        """ Returns fourth cumulant.
+        """
+        w = self.reweighting
+        avg = np.average(self.critical_observable, weights=w)
+        H_m = np.abs(self.critical_observable - avg)
+        H_m2 = H_m**2
+        M2 = np.average(H_m2, weights=w)
+        M4 = np.average(H_m2**2, weights=w)
+        K4 = M4/(M2*M2)
+        return K4
 
     def from_namd(self, fin, skip_percent=0.1):
         """ Read statistical data from NAMD output file.
@@ -75,8 +109,10 @@ data.columns: %s
                                        "the ensemble must be NPT"
         self.timestep = namd_search_col(fin, "Info: TIMESTEP", 3)
         self.freq = namd_search_col(fin, "PRESSURE OUTPUT STEPS", 5)
+        self.mass = namd_search_col(fin, "TOTAL MASS", 5)
         self.data["volume"] = namd_get_energy_col(fin, 19,
                                                   skip_percent=skip_percent)
+        self.data["density"] = self.mass/self.data["volume"]
         self.data["pressure"] = namd_get_energy_col(fin, 17,
                                                     skip_percent=skip_percent)
         self.data["temperature"] = \
