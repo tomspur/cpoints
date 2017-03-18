@@ -37,6 +37,7 @@ def namd_get_energy_col(fin, column, skip_percent=0.1):
 class Statistics(object):
     """ Class to investigate statistics of MC/MD simulation.
     """
+
     def __init__(self, ensemble="NPT"):
         self.timestep = -1
         self.freq = -1
@@ -44,13 +45,21 @@ class Statistics(object):
         self.data = pd.DataFrame()
         self.ensemble = ensemble
 
+    def __repr__(self):
+        return """Ensemble: %s
+timestep: %f
+data.shape: %s
+data.columns: %s
+""" % (self.ensemble, self.timestep, self.data.shape,
+       self.data.columns.values)
+
     @property
     def critical_observable(self):
         """ Returns the critical observable.
         """
         if self.ensemble == "NPT":
             return self.data["density"] - \
-                self.fm_s*self.data["energy"]/self.data["volume"]
+                self.fm_s * self.data["energy"] / self.data["volume"]
         else:
             return self.data["N"]
 
