@@ -28,11 +28,11 @@ def read_namd(fin):
 def namd_search_col(fin, line, column):
     """ Search in NAMD file for @line and return @column-th column.
     """
-    ret = subprocess.check_output("grep \"%s\" \"%s\" |"
+    ret = subprocess.check_output("grep -I \"%s\" \"%s\" |"
                                   "awk '{print $%d}'" % (line, fin, column),
                                   shell=True)
     nums = np.fromstring(ret, sep="\n")
-    assert len(nums) == 1
+    assert len(nums) == 1, ret
     return nums[0]
 
 
@@ -44,7 +44,7 @@ def namd_get_energy_col(fin, column, skip_percent=0.1):
     - skip_percent: Percentage of the trajectory that is skipped at the
       beginning.
     """
-    ret = subprocess.check_output("grep 'ENERGY:' \"%s\" |"
+    ret = subprocess.check_output("grep -I 'ENERGY:' \"%s\" |"
                                   "awk '{print $%d}' |"
                                   "grep -v ENERGY" % (fin, column), shell=True)
     nums = np.fromstring(ret, sep="\n")
