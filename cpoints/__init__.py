@@ -4,9 +4,25 @@ Tools to calculate critical points from monte carlo or molecular dynamics
 simulations.
 """
 import numpy as np
+import os
 import pandas as pd
 import pickle
 import subprocess
+
+
+def read_namd(fin):
+    """ Read NAMD file and return Statistics object.
+    """
+    pkl = fin[:fin.rfind(".")] + ".pkl"
+    if os.path.exists(pkl):
+        print("WARNING: pickle file from previous read found")
+        print("WARNING: reading from %s" % pkl)
+        with open(pkl, "rb") as fin:
+            data = pickle.load(fin)
+    else:
+        data = Statistics()
+        data.from_namd(fin)
+    return data
 
 
 def namd_search_col(fin, line, column):
@@ -104,6 +120,10 @@ K4: %f
     def from_namd(self, fin, skip_percent=0.1):
         """ Read statistical data from NAMD output file.
 
+        Note:
+        - After reading from NAMD output file a .pkl file will be written to
+          speed up later reading of the same output file.
+
         Parameters:
         - fin: NAMD output file that is read.
         - skip_percent: Percentage of the trajectory that is skipped at the
@@ -135,7 +155,8 @@ K4: %f
         self.data["kinetic_energy"] = namd_get_energy_col(
             fin, 11, skip_percent=skip_percent)
 
-        self.to_pkl(fin[:fin.rfind(".")] + ".pkl")
+        pkl = fin[:fin.rfind(".")] + ".pkl"
+        self.to_pkl(pkl)
 
     def from_mc(self, fin, usecols=None):
         """ Read statistical data from monte carlo output file.
