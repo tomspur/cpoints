@@ -50,12 +50,15 @@ class Statistics(object):
 timestep: %f
 data.shape: %s
 data.columns: %s
+head(data): %s
+mean(data): %s
 
 Current values at this point in the phase space:
 K2: %f
 K4: %f
 """ % (self.ensemble, self.timestep, self.data.shape,
-       self.data.columns.values, self.K2, self.K4)
+       self.data.columns.values, self.data.head(), self.data.mean(),
+       self.K2, self.K4)
 
     @property
     def critical_observable(self):
