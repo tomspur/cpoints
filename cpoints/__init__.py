@@ -57,6 +57,8 @@ class Statistics(object):
 
     def __init__(self, ensemble="NPT"):
         self.timestep = -1
+        self.temperature = 0
+        self.pressure = 0
         self.freq = -1
         self.fm_s = 0.0
         self.data = pd.DataFrame()
@@ -64,6 +66,8 @@ class Statistics(object):
 
     def __repr__(self):
         return """Ensemble: %s
+temperature: %f
+pressure: %f
 timestep: %f
 data.shape: %s
 data.columns: %s
@@ -73,7 +77,8 @@ mean(data): %s
 Current values at this point in the phase space:
 K2: %f
 K4: %f
-""" % (self.ensemble, self.timestep, self.data.shape,
+""" % (self.ensemble, self.temperature, self.pressure,
+       self.timestep, self.data.shape,
        self.data.columns.values, self.data.head(), self.data.mean(),
        self.K2, self.K4)
 
@@ -131,6 +136,8 @@ K4: %f
         """
         assert self.ensemble == "NPT", "Reading from NAMD, " \
                                        "the ensemble must be NPT"
+        self.temperature = namd_search_col(fin, "INITIAL TEMPERATURE", 4)
+        self.pressure = namd_search_col(fin, "TARGET PRESSURE", 5)
         self.timestep = namd_search_col(fin, "Info: TIMESTEP", 3)
         self.freq = namd_search_col(fin, "PRESSURE OUTPUT STEPS", 5)
         self.mass = namd_search_col(fin, "TOTAL MASS", 5)
