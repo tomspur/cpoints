@@ -9,6 +9,8 @@ import pandas as pd
 import pickle
 import subprocess
 
+PKL_VERSION = 1
+
 
 def read_namd(fin):
     """ Read NAMD file and return Statistics object.
@@ -17,11 +19,15 @@ def read_namd(fin):
     if os.path.exists(pkl):
         print("WARNING: pickle file from previous read found")
         print("WARNING: reading from %s" % pkl)
-        with open(pkl, "rb") as fin:
-            data = pickle.load(fin)
-    else:
-        data = Statistics()
-        data.from_namd(fin)
+        with open(pkl, "rb") as pkl:
+            data = pickle.load(pkl)
+        if hasattr(data, "PKL_VERSION") and data.PKL_VERSION == PKL_VERSION:
+            return data
+        else:
+            print("WARNING: PKL_VERSION does not match"
+                  "reading from NAMD again.")
+    data = Statistics()
+    data.from_namd(fin)
     return data
 
 
@@ -56,6 +62,7 @@ class Statistics(object):
     """
 
     def __init__(self, ensemble="NPT"):
+        self.PKL_VERSION = PKL_VERSION
         self.timestep = -1
         self.temperature = 0
         self.pressure = 0
