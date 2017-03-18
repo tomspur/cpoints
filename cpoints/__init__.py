@@ -85,6 +85,11 @@ class Statistics(object):
         self.data["N"] = np.loadtxt(fin, usecols=np.array([usecols[0]]))
         self.data["E"] = np.loadtxt(fin, usecols=np.array([usecols[1]]))
 
+    def from_csv(self, fin):
+        """ Load statistical data from CSV file.
+        """
+        self.data = pd.read_csv(fin)
+
     def to_csv(self, fout):
         """ Save statistical data to CSV file.
         """
