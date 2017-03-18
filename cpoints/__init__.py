@@ -40,8 +40,19 @@ class Statistics(object):
     def __init__(self, ensemble="NPT"):
         self.timestep = -1
         self.freq = -1
+        self.fm_s = 0.0
         self.data = pd.DataFrame()
         self.ensemble = ensemble
+
+    @property
+    def critical_observable(self):
+        """ Returns the critical observable.
+        """
+        if self.ensemble == "NPT":
+            return self.data["density"] - \
+                self.fm_s*self.data["energy"]/self.data["volume"]
+        else:
+            return self.data["N"]
 
     def from_namd(self, fin, skip_percent=0.1):
         """ Read statistical data from NAMD output file.
