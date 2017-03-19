@@ -4,17 +4,10 @@ Test grand canonical simulation data
 """
 import numpy as np
 from numpy.testing import assert_almost_equal
-import os
 import pytest
 
 import cpoints as cp
-
-
-def get_test_file():
-    """ Returns the path to the test data file.
-    """
-    return os.path.sep.join(__file__.split(os.path.sep)[:-1] +
-                            ["GK_histo.dat"])
+from cpoints.tests import get_test_file
 
 
 def test_read_gk():
