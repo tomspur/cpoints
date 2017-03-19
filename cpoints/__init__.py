@@ -307,3 +307,39 @@ K4: %f
         """
         with open(fout, "wb") as fout:
             pickle.dump(self, fout)
+
+    def interact(self):
+        """ Start interactive reweighting in ipython.
+        """
+        from ipywidgets import interact, FloatSlider
+
+        if self.ensemble == "grand_canonical":
+            def f(temperature, mu):
+                self.rew_temperature = temperature
+                self.rew_obs = mu
+                w = self.reweighting
+                return self.critical_observable.hist(bins=100,
+                                                     weights=w)
+            temp = self.temperature
+            mu = self.observable
+            interact(f, temperature=FloatSlider(min=0.95*temp, max=1.05*temp,
+                                                step=0.001, value=temp,
+                                                continuous_update=False),
+                     mu=FloatSlider(min=1.05*mu, max=0.95*mu,
+                                    step=0.001, value=mu,
+                                    continuous_update=False))
+        else:
+            def f(temperature, pressure):
+                self.rew_temperature = temperature
+                self.rew_obs = pressure
+                w = self.reweighting
+                return self.critical_observable.hist(bins=100,
+                                                     weights=w)
+            temp = self.temperature
+            press = self.observable
+            interact(f, temperature=FloatSlider(min=temp-10.0, max=temp+10.0,
+                                                step=0.05, value=temp,
+                                                continuous_update=False),
+                     pressure=FloatSlider(min=press-10.0, max=press+10.0,
+                                          step=0.05, value=press,
+                                          continuous_update=False))
