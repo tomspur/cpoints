@@ -160,8 +160,9 @@ K4: %f
         w = self.reweighting
         obs = self.critical_observable
         mean = np.average(obs, weights=w)
-        left = sum([we for o, we in zip(obs, w) if o < mean])
-        right = sum([we for o, we in zip(obs, w) if o >= mean])
+        where = np.where(obs < mean)
+        left = np.sum(w[where])
+        right = np.sum(w) - left
         # print("GOT area", observable, left, right)
         try:
             return abs(left - right)/(left+right)
@@ -181,7 +182,7 @@ K4: %f
 
         ret = np.exp(-delta_b*self.data["total_energy"] +
                      -delta_bp*self.data["volume"])
-        return ret
+        return ret.values
 
     @property
     def K2(self):
