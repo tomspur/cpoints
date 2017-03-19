@@ -109,9 +109,14 @@ K4: %f
         else:
             raise NotImplementedError("exp observable of GK: mu")
 
-    def extrapolate(self, temperature, obs):
+    def extrapolate(self, temperature, obs=None):
         """ Extrapolate to new phase space.
         """
+        if obs is None:
+            # TODO use linear estimate (or another polynomial) as initial guess
+            # Use pressure from simulation
+            # TODO Generalize self.pressure for MC
+            obs = self.pressure
         print("INFO: reweighting to:", temperature, obs)
         self.rew_temperature = temperature
         self.rew_obs = obs

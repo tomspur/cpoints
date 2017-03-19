@@ -12,7 +12,7 @@ print(data)
 delta = 0.01
 res = []
 for i in range(-10, 10):
-    data.extrapolate(data.temperature + delta*i, data.observable)# + delta*i)
+    data.extrapolate(data.temperature + delta*i)  # , data.observable)# + delta*i)
     res.append([data.temperature + delta*i, data.observable + delta*i,
                 data.K2, data.K4])
 res = pd.DataFrame(res, columns=["temperature", "pressure", "K2", "K4"])
