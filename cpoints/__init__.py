@@ -9,7 +9,7 @@ import pandas as pd
 import pickle
 import subprocess
 
-PKL_VERSION = 1
+PKL_VERSION = 2
 
 
 def read_namd(fin):
@@ -81,12 +81,13 @@ data.columns: %s
 head(data): %s
 mean(data): %s
 
-Current values at this point in the phase space:
+Current values at temp %f and obs %f in the phase space:
 K2: %f
 K4: %f
 """ % (self.ensemble, self.temperature, self.pressure,
        self.timestep, self.data.shape,
        self.data.columns.values, self.data.head(), self.data.mean(),
+       self.rew_temperature, self.rew_obs,
        self.K2, self.K4)
 
     @property
@@ -100,8 +101,35 @@ K4: %f
             return self.data["N"]
 
     @property
+    def observable(self):
+        """ Returns the experimental observable.
+        """
+        if self.ensemble == "NPT":
+            return self.pressure
+        else:
+            raise NotImplementedError("exp observable of GK: mu")
+
+    def extrapolate(self, temperature, obs):
+        """ Extrapolate to new phase space.
+        """
+        print("INFO: reweighting to:", temperature, obs)
+        self.rew_temperature = temperature
+        self.rew_obs = obs
+
+    @property
     def reweighting(self):
-        return np.ones_like(self.data["total_energy"])
+        """ Calculate weights for new phase point.
+        """
+        if self.rew_temperature == self.temperature:
+            return np.ones_like(self.data["total_energy"])
+        delta_b = 1/self.rew_temperature - 1/self.temperature
+        # TODO Generalize self.pressure for MC
+        delta_bp = self.rew_obs/self.rew_temperature - \
+                   self.pressure/self.temperature
+
+        ret = np.exp(-delta_b*self.data["total_energy"] +
+                     -delta_bp*self.data["volume"])
+        return ret
 
     @property
     def K2(self):
@@ -145,6 +173,11 @@ K4: %f
                                        "the ensemble must be NPT"
         self.temperature = namd_search_col(fin, "INITIAL TEMPERATURE", 4)
         self.pressure = namd_search_col(fin, "TARGET PRESSURE", 5)
+
+        # Set current phase point
+        self.rew_temperature = self.temperature
+        self.rew_obs = self.pressure
+
         self.timestep = namd_search_col(fin, "Info: TIMESTEP", 3)
         self.freq = namd_search_col(fin, "PRESSURE OUTPUT STEPS", 5)
         self.mass = namd_search_col(fin, "TOTAL MASS", 5)
