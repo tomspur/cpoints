@@ -116,7 +116,7 @@ K4: %f
         if self.ensemble == "NPT":
             return self.pressure
         else:
-            raise NotImplementedError("exp observable of GK: mu")
+            return self.mu
 
     def extrapolate(self, temperature, obs=None, coexistence=True,
                     field_mixing=False):
@@ -133,12 +133,14 @@ K4: %f
         if obs is None:
             # TODO use linear estimate (or another polynomial) as initial guess
             # Use pressure from simulation
-            # TODO Generalize self.pressure for MC
-            obs = self.pressure
+            obs = self.observable
         print("INFO: reweighting to:", temperature, obs)
         self.rew_temperature = temperature
         self.rew_obs = obs
         if field_mixing:
+            if self.ensemble == "grand_canonical":
+                raise NotImplementedError("field mixing not implemented for"
+                                          "grand_canonical")
             # Determine "s" parameter from field mixing
             best = opt.fmin_slsqp(self.Ksums, -3.0,
                                   acc=1e-5, epsilon=1e-5)
@@ -173,15 +175,20 @@ K4: %f
     def reweighting(self):
         """ Calculate weights for new phase point.
         """
-        if self.rew_temperature == self.temperature:
-            return np.ones_like(self.data["total_energy"])
         delta_b = 1/self.rew_temperature - 1/self.temperature
-        # TODO Generalize self.pressure for MC
-        delta_bp = self.rew_obs/self.rew_temperature - \
-                   self.pressure/self.temperature
+        if self.ensemble == "NPT":
+            delta_bp = self.rew_obs/self.rew_temperature - \
+                       self.pressure/self.temperature
 
-        ret = np.exp(-delta_b*self.data["total_energy"] +
-                     -delta_bp*self.data["volume"])
+            ret = np.exp(-delta_b*self.data["total_energy"] +
+                         -delta_bp*self.data["volume"])
+        else:
+            delta_mub = self.rew_obs/self.rew_temperature - \
+                        self.mu/self.temperature
+            ret = np.exp(-(delta_b)*self.data["total_energy"] + \
+                          (delta_mub)*self.data["N"])
+        if np.sum(ret) == 0.0:
+            return np.ones_like(self.data["total_energy"])
         return ret.values
 
     @property

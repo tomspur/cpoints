@@ -42,3 +42,12 @@ def test_cumulants():
     print("K2/K4:", data.K2, data.K4)
     assert_almost_equal(data.K2, 1.25963602195)
     assert_almost_equal(data.K4, 1.66009790754)
+
+    data.extrapolate(data.temperature)
+    print("K2/K4/mu:", data.K2, data.K4, data.rew_obs)
+    assert_almost_equal(data.K2, 1.25957559223)
+    assert_almost_equal(data.K4, 1.65968547893)
+    assert_almost_equal(data.rew_obs, -2.83094834914)
+
+    with pytest.raises(NotImplementedError):
+        data.extrapolate(data.temperature, field_mixing=True)
