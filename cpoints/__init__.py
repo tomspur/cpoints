@@ -109,8 +109,17 @@ K4: %f
         else:
             raise NotImplementedError("exp observable of GK: mu")
 
-    def extrapolate(self, temperature, obs=None):
+    def extrapolate(self, temperature, obs=None, coexistence=True,
+                    field_mixing=False):
         """ Extrapolate to new phase space.
+
+        The new point in the phase space is defined by the argumentss:
+        - temperature
+        - obs for the second observable
+
+        Parameters:
+        - coexistence: Also reweight to coexistence with the equal area rule
+        - field_mixing: Also estimate "s" parameter of field mixing
         """
         if obs is None:
             # TODO use linear estimate (or another polynomial) as initial guess
@@ -120,6 +129,12 @@ K4: %f
         print("INFO: reweighting to:", temperature, obs)
         self.rew_temperature = temperature
         self.rew_obs = obs
+        if field_mixing:
+            # Determine "s" parameter from field mixing
+            pass
+        if coexistence:
+            # Determine best value for obs with the equal area rule
+            pass
 
     @property
     def reweighting(self):
