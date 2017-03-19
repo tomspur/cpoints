@@ -32,6 +32,7 @@ def test_read_gk():
         data = cp.Statistics(ensemble="NPT")
         data.from_mc(get_test_file())
 
+
 def test_cumulants():
     """ Test cumulants of gk file.
     """

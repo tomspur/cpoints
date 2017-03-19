@@ -18,3 +18,4 @@ for i in range(-10, 10):
 res = pd.DataFrame(res, columns=["temperature", "pressure", "K2", "K4"])
 
 print(res)
+res.to_csv("tmp.csv", index=False)

@@ -7,6 +7,7 @@ import numpy as np
 import os
 import pandas as pd
 import pickle
+import scipy.optimize as opt
 import subprocess
 
 PKL_VERSION = 2
@@ -142,7 +143,26 @@ K4: %f
             pass
         if coexistence:
             # Determine best value for obs with the equal area rule
-            pass
+            best = opt.fmin_slsqp(self.area_parameter, obs,
+                                  acc=1e-5, epsilon=1e-5)
+            self.rew_obs = best[0]
+
+    def area_parameter(self, observable):
+        """ Calculate equal area parameter...
+
+        with a new test value for the reweighting observable.
+        """
+        self.rew_obs = observable
+        w = self.reweighting
+        obs = self.critical_observable
+        mean = np.average(obs, weights=w)
+        left = sum([we for o, we in zip(obs, w) if o < mean])
+        right = sum([we for o, we in zip(obs, w) if o >= mean])
+        print("got", observable, left, right)
+        try:
+            return abs(left - right)/(left+right)
+        except ZeroDivisionError:
+            return 1e10
 
     @property
     def reweighting(self):
