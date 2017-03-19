@@ -12,6 +12,14 @@ import subprocess
 PKL_VERSION = 2
 
 
+def read_mc(fin):
+    """ Read Monte Carlo file and return Statistics object.
+    """
+    data = Statistics("grand_canonical")
+    data.from_mc(fin)
+    return data
+
+
 def read_namd(fin):
     """ Read NAMD file and return Statistics object.
     """
@@ -225,15 +233,24 @@ K4: %f
         pkl = fin[:fin.rfind(".")] + ".pkl"
         self.to_pkl(pkl)
 
-    def from_mc(self, fin, usecols=None):
+    def from_mc(self, fin, usecols=None, temperature=0.999, mu=-2.831):
         """ Read statistical data from monte carlo output file.
+
+        Parameters:
+        - temperature and mu: default to the values of the bundled test file!!
         """
         assert self.ensemble == "grand_canonical", "Reading from monte carlo "\
                                 "output, the ensemble must be grand_canonical!"
         if usecols is None:
             usecols = [1, 3]
         self.data["N"] = np.loadtxt(fin, usecols=np.array([usecols[0]]))
-        self.data["E"] = np.loadtxt(fin, usecols=np.array([usecols[1]]))
+        self.data["total_energy"] = np.loadtxt(fin,
+                                               usecols=np.array([usecols[1]]))
+
+        self.temperature = temperature
+        self.mu = mu
+        self.rew_temperature = self.temperature
+        self.rew_obs = self.mu
 
     def from_csv(self, fin):
         """ Load statistical data from CSV file.
