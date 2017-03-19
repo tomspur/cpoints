@@ -17,8 +17,8 @@ res = []
 for i in range(-10, 10):
     data.extrapolate(data.temperature + delta*i)  # , data.observable)# + delta*i)
     res.append([data.temperature + delta*i, data.rew_obs,
-                data.K2, data.K4])
-res = pd.DataFrame(res, columns=["temperature", "pressure", "K2", "K4"])
+                data.K2, data.K4, data.fm_s])
+res = pd.DataFrame(res, columns=["temperature", "pressure", "K2", "K4", "s"])
 
 print(res)
 res.to_csv("tmp.csv", index=False)
