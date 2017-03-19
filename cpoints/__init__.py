@@ -140,12 +140,16 @@ K4: %f
         self.rew_obs = obs
         if field_mixing:
             # Determine "s" parameter from field mixing
-            pass
+            best = opt.fmin_slsqp(self.Ksums, -3.0,
+                                  acc=1e-5, epsilon=1e-5)
+            self.fm_s = best[0]
+            print("Final value for s", self.fm_s)
         if coexistence:
             # Determine best value for obs with the equal area rule
             best = opt.fmin_slsqp(self.area_parameter, obs,
                                   acc=1e-5, epsilon=1e-5)
             self.rew_obs = best[0]
+            print("Final value for obs", self.rew_obs)
 
     def area_parameter(self, observable):
         """ Calculate equal area parameter...
@@ -158,7 +162,7 @@ K4: %f
         mean = np.average(obs, weights=w)
         left = sum([we for o, we in zip(obs, w) if o < mean])
         right = sum([we for o, we in zip(obs, w) if o >= mean])
-        print("got", observable, left, right)
+        # print("GOT area", observable, left, right)
         try:
             return abs(left - right)/(left+right)
         except ZeroDivisionError:
@@ -204,6 +208,14 @@ K4: %f
         M4 = np.average(H_m2**2, weights=w)
         K4 = M4/(M2*M2)
         return K4
+
+    def Ksums(self, fm_s=None):
+        """ Returns sum of both cumulants with new parameter for s.
+        """
+        # print("GOT s", fm_s)
+        if fm_s is not None:
+            self.fm_s = fm_s
+        return self.K2 + self.K4
 
     def from_namd(self, fin, skip_percent=0.1):
         """ Read statistical data from NAMD output file.

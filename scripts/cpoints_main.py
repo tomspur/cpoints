@@ -9,6 +9,9 @@ import cpoints as cp
 data = cp.read_namd(sys.argv[1])
 print(data)
 
+print("Symmetrizing")
+data.extrapolate(data.temperature, field_mixing=True)
+
 delta = 0.01
 res = []
 for i in range(-10, 10):
