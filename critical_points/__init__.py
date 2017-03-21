@@ -51,6 +51,10 @@ def namd_search_col(fin, line, column):
                                   "awk '{print $%d}'" % (line, fin, column),
                                   shell=True)
     nums = np.fromstring(ret, sep="\n")
+    if len(nums) != 1:
+        for i in range(len(nums) - 1):
+            assert nums[i] == nums[-1], nums
+        return nums[0]
     assert len(nums) == 1, ret
     return nums[0]
 
