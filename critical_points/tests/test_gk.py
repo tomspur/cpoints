@@ -6,8 +6,8 @@ import numpy as np
 from numpy.testing import assert_almost_equal
 import pytest
 
-import cpoints as cp
-from cpoints.tests import get_test_file
+import critical_points as cp
+from critical_points.tests import get_test_file
 
 
 def test_read_gk():

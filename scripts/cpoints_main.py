@@ -4,10 +4,13 @@
 import pandas as pd
 import sys
 
-import cpoints as cp
+import critical_points as cp
 
 data = cp.read_namd(sys.argv[1])
 print(data)
+
+print("Exiting")
+sys.exit(0)
 
 print("Symmetrizing")
 data.extrapolate(data.temperature, field_mixing=True)
