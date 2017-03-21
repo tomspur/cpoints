@@ -29,12 +29,16 @@ def read_namd(fin):
         print("WARNING: pickle file from previous read found")
         print("WARNING: reading from %s" % pkl)
         with open(pkl, "rb") as pkl:
-            data = pickle.load(pkl)
-        if hasattr(data, "PKL_VERSION") and data.PKL_VERSION == PKL_VERSION:
-            return data
-        else:
-            print("WARNING: PKL_VERSION does not match"
-                  "reading from NAMD again.")
+            try:
+                data = pickle.load(pkl)
+                if hasattr(data, "PKL_VERSION") and data.PKL_VERSION == PKL_VERSION:
+                    return data
+                else:
+                    print("WARNING: PKL_VERSION does not match"
+                          "reading from NAMD again.")
+            except ModuleNotFoundError:
+                # unpickling failed so read original data below
+                pass
     data = Statistics()
     data.from_namd(fin)
     return data
